@@ -1,0 +1,17 @@
+{
+  "name": "eventstore-stream-subscriber",
+  "version": "1.0.0",
+  "description": "Eventhandler for an eventstore stream",
+  "main": "eventstore-stream-subscriber.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "eventstore"
+  ],
+  "author": "Mats Alm",
+  "license": "ISC",
+  "dependencies": {
+    "mocha": "^6.1.4"
+  }
+}
