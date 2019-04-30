@@ -3,7 +3,7 @@
 ```javascript
 var consumer = require("eventstore-stream-consumer");
 // register handlers
-consumer.registerHanler("myEventType", function(subscription, event){
+consumer.registerHandler("myEventType", function(subscription, e){
     //handle event here...
 })
 
