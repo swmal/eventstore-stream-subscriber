@@ -1,5 +1,5 @@
 var assert = require("assert");
-var subscriber = require("../app/eventstore-stream-subscriber");
+var eventhandler = require("../app/eventstore-eventhandler.js");
 
 describe("test main subscriber", function(){
     it("should add a handler and emit an event", function(){
@@ -7,8 +7,8 @@ describe("test main subscriber", function(){
         var handler = (data) => {
             actual = data;
         };
-        subscriber.registerHandler("test", handler);
-        subscriber.emitEvent("test", 2);
+        eventhandler.registerHandler("test", handler);
+        eventhandler.emitEvent("test", 2);
 
         assert.strictEqual(actual, 2);
     });
@@ -18,16 +18,16 @@ describe("test main subscriber", function(){
         var handler1 = (data) => {
             actual1 = data;
         };
-        subscriber.registerHandler("test1", handler1);
+        eventhandler.registerHandler("test1", handler1);
 
         //handler 2
         var actual2 = -1;
         var handler2 = (data) => {
             actual2 = data;
         };
-        subscriber.registerHandler("test2", handler2);
+        eventhandler.registerHandler("test2", handler2);
         
-        subscriber.emitEvent("test1", 2);
+        eventhandler.emitEvent("test1", 2);
 
         assert.strictEqual(actual1, 2);
         assert.strictEqual(actual2, -1);
