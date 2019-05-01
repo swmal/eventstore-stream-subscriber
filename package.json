@@ -1,6 +1,6 @@
 {
   "name": "eventstore-stream-subscriber",
-  "version": "1.0.20",
+  "version": "1.0.24",
   "description": "Eventhandler for an eventstore stream",
   "main": "app/eventstore-stream-subscriber.js",
   "scripts": {

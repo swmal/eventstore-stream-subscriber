@@ -20,12 +20,15 @@ var credentials = null;
 
 /**
  * Connects to an eventstore server: either to localhost:
- * @param {ConnectionSettings} settings settings to Eventstore
+ * @param {Object} settings settings to Eventstore
+ * @param {number} settings.maxQueueSize Max queue size
+ * @param {boolean} settings.useSslConnection True if ssl connection
+ * @param {number} settings.heartbeatInterval Heartbeat interval
  * @param {string} userName Eventstore username for authentication
  * @param {string} password Eventstore password for authentication
  * @returns {Promise.void} 
  */
-function createConnection(settings : ESConnectionSettings, userName : string, password : string) {
+function createConnection(settings, userName, password) {
     var error = null;
     if(!settings) throw new Error("parameter settings must be an object");
     credentials = new client.UserCredentials(userName, password);
@@ -58,7 +61,7 @@ function createConnection(settings : ESConnectionSettings, userName : string, pa
  * @param {string} stream the stream to subscribe to
  * @returns {Promise.void}
  */
-function subscribeToStream(stream : string) {
+function subscribeToStream(stream) {
     return new Promise(function(resolve, reject){
         if(!connection){
             reject("Connection not initialized, call createConnection() first");
@@ -72,37 +75,13 @@ function subscribeToStream(stream : string) {
             );
             resolve();
         }
-    }
+    });
     
 }
 
-export interface ESConnectionSettings{
-    maxQueueSize?: number,
-    defaultUserCredentials?: UserCredentials,
-    useSslConnection?: boolean,
-    heartbeatInterval?: number,
-    heartbeatTimeout?: number,
-}
-/**
- * Connects to an eventstore server: either to localhost:
- * @param {ESConnectionSettings} settings settings to Eventstore
- * @param {string} userName Eventstore username for authentication
- * @param {string} password Eventstore password for authentication
- * @returns {Promise.void} 
- */
- */
+
 module.exports.createConnection = createConnection;
-/**
- * Subscribes to the supplied stream over the initiated connection.
- * @param {string} stream the stream to subscribe to
- * @returns {Promise.void}
- */
 module.exports.subscribeToStream = subscribeToStream;
-/**
- * Registers an event handler on a specific event type on the stream.
- * @param {string} eventType Event type to subscribe to
- * @param {function} handler Event handler. A function with parameters subscription and event.
- */
 module.exports.registerHandler = eventhandler.registerHandler;
 
 
