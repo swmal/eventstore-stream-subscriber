@@ -9,7 +9,7 @@ const eventHandlers = new MyEmitter();
  * @param {function} handler Event handler. A function with parameters subscription and event.
  */
 function registerHandler(eventType, handler){
-    if(!(typeof(handler) === 'function')){
+    if(typeof handler !== 'function'){
         throw new Error("argument 'handler' must be a function");
     }
     eventHandlers.on(eventType, handler);
