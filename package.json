@@ -12,6 +12,8 @@
   "author": "Mats Alm",
   "license": "ISC",
   "dependencies": {
+    "assert-promise": "0.0.3",
+    "chai": "^4.2.0",
     "mocha": "^6.1.4",
     "node-eventstore-client": "0.2.10"
   }

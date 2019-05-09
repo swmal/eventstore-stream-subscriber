@@ -12,7 +12,11 @@ function registerHandler(eventType, handler){
     if(typeof handler !== 'function'){
         throw new Error("argument 'handler' must be a function");
     }
-    eventHandlers.on(eventType, handler);
+    let found = eventHandlers.listeners(eventType).find(element => {
+        return ''+element === ''+handler;
+      });
+    if(found === undefined)
+        eventHandlers.addListener(eventType, handler);
 }
 
 /**

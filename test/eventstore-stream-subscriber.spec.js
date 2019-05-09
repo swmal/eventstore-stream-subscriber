@@ -32,4 +32,5 @@ describe("test main subscriber", function(){
         assert.strictEqual(actual1, 2);
         assert.strictEqual(actual2, -1);
     });
+    
 });
