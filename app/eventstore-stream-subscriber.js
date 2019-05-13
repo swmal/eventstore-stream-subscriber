@@ -1,6 +1,7 @@
 
 const eventhandler = require('./eventstore-eventhandler.js');
 const client = require("node-eventstore-client");
+const absorb = require("absorb");
 
 
 /**
@@ -12,13 +13,15 @@ const client = require("node-eventstore-client");
  * @param {string} eventstoreHost Eventstore hostname
  * @param {number} eventstorePort Eventstore port
  */
-var configuration = {
+let configuration = {
     resolveLinkTos : true,
     logHeartbeats : true,
     userName : "admin",
     password : "changeit",
     eventstoreHost : "127.0.0.1",
-    eventstorePort : 1113
+    eventstorePort : 1113,
+    logger: console.log
+
 };
 
 const eventstoreHelper = {
@@ -38,20 +41,8 @@ const eventstoreHelper = {
 function configure(config){
     if(typeof config !== 'object')
         throw Error("argument 'config' must be an object");
-    configuration.resolveLinkTos = config.resolveLinkTos;
-    configuration.logHeartbeats = config.logHeartbeats;
-    if(config.userName){
-        configuration.userName = config.userName;
-    }
-    if(config.password){
-        configuration.password = config.password;
-    }
-    if(config.eventstoreHost){
-        configuration.eventstoreHost = config.eventstoreHost;
-    }
-    if(config.eventstorePort){
-        configuration.eventstorePort = config.eventstorePort;
-    }
+        absorb(configuration, config);
+    
 }
 
 
@@ -91,7 +82,7 @@ function createConnection(settings) {
                 console.log('Heartbeat latency', heartbeatInfo.responseReceivedAt - heartbeatInfo.requestSentAt, 'ms'));
             }
             conn.once("connected", tcpEndpoint => {
-                console.log(`connected to Eventstore - host: ${tcpEndpoint.host} port: ${tcpEndpoint.port}`);
+                console.log("connected to Eventstore - host: ${tcpEndpoint.host} port: ${tcpEndpoint.port}");
                 resolve();
             });
             
