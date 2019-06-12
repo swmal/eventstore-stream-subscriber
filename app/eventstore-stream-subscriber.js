@@ -19,7 +19,7 @@ var configuration = {
     password : "changeit",
     eventstoreHost : "127.0.0.1",
     eventstorePort : 1113
-}
+};
 
 const eventstoreHelper = {
     getCredentials : () => client.UserCredentials(configuration.userName, configuration.password),
@@ -100,6 +100,17 @@ function createConnection(settings) {
 }
 
 /**
+ * Closes an open connection
+ * @returns
+ */
+function closeConnection() {
+    let endpoint = eventstoreHelper.getEndpoint();
+    console.log("Closing connection to host " + endpoint);
+    eventstoreHelper.connection.close();
+    
+}
+
+/**
  * Subscribes to the supplied stream over the initiated connection.
  * @param {string} stream the stream to subscribe to
  * @returns {Promise.void}
@@ -150,6 +161,7 @@ function catchupAndSubscribeToStream(stream){
  */
 module.exports.configure = configure;
 module.exports.createConnection = createConnection;
+module.exports.closeConnection = closeConnection;
 module.exports.subscribeToStream = subscribeToStream;
 module.exports.catchupAndSubscribeToStream = catchupAndSubscribeToStream;
 module.exports.registerHandler = eventhandler.registerHandler;
