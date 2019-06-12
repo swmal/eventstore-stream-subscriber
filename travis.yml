@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - "8"
+before_install:
+  - npm i -g npm@version-number
+deploy:
+  provider: npm
+  email: "mats.alms.epost@gmail.com"
+  api_key: "82a48a66-2894-4621-a17a-0c1d6393b043"
