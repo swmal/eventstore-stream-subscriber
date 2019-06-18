@@ -12,8 +12,7 @@ it("should add a handler, connect to EventStore, emit an event and close the con
             console.log("Event received");
             console.log(e);
     
-            //Close the connection
-            subscriber.closeConnection();
+          
 
             resolve(true);
         });
@@ -24,35 +23,53 @@ it("should add a handler, connect to EventStore, emit an event and close the con
             console.log("Event received");
             console.log(e);
     
-            //Close the connection
-            subscriber.closeConnection();
 
             resolve(true);
         });
 
         // configure the subscriber
+        // removed ip 192.168.99.100
         subscriber.configure({
             resolveLinkTos : false,
             logHeartbeats : false,
-            eventstoreHost:"192.168.99.100",
+            eventstoreHost:"127.0.0.1",
             eventstorePort: "1113"
         });
 
         // connect and start consuming events
         subscriber.createConnection({}).then(() =>
-            subscriber.catchupAndSubscribeToStream("myStream")
-                .catch((reason) => reject(reason))
+            subscriber.subscribeToStream("myStream").then(() => {
+            // publish an event
+            var uuid = require('uuid');
+            const esClient = require("node-eventstore-client");
+            var connSettings = {};  // Use defaults
+            var esConnection = esClient.createConnection(connSettings, "tcp://localhost:1113");
+            esConnection.connect();
+            esConnection.once('closed', () => console.log("publishing connection closed"));
+            esConnection.once('connected', function (tcpEndPoint) {
+                console.log('Connected to eventstore at ' + tcpEndPoint.host + ":" + tcpEndPoint.port);
+                var eventId = uuid.v4();
+                var eventData = {
+                    a : Math.random(), 
+                    b: uuid.v4()
+                };
+                var event = esClient.createJsonEventData(eventId, eventData, null, 'myEventType');
+                console.log("Appending...");
+                esConnection.appendToStream("myStream", esClient.expectedVersion.any, event).then((result) => {
+                    console.log("Event published, id: " + result);
+                    esConnection.close();
+                });
+                
+            });
+            }).catch((reason) => reject(reason))
         )
         .catch((reason) => reject(reason));
+    });       
+        let result = await promise;
+
+        setTimeout(() => subscriber.closeConnection(), 400);
+
+        expect(result).to.equal(true); 
     });
-    
-    let result = await promise;
-
-    expect(result).to.equal(true); 
-    
-    
-
-
-});
 });
 

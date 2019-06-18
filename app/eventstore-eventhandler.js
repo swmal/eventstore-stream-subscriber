@@ -29,5 +29,10 @@ function emitEvent(eventType, subscription, e){
     eventHandlers.emit(eventType, subscription, e);
 }
 
+function removeAllListeners(){
+    eventHandlers.removeAllListeners();
+}
+
 module.exports.registerHandler = registerHandler;
 module.exports.emitEvent = emitEvent;
+module.exports.removeAllListeners = removeAllListeners;

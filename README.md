@@ -66,7 +66,7 @@ EVENTSTORE_STREAM_SUB_HOST=eventstoreprod.somewhere.com
 EVENTSTORE_STREAM_SUB_PORT=3113
 ```
 Since .env overrides the configuration object, both of these will have the same effect when .env variables are present:
-```Javascript
+```javascript
 //With local config
 subscriber.createConnection({eventstoreHost : "eventstore.local", eventstorePort : 2113}).then(() =>
     subscriber.catchupAndSubscribeToStream("myStream")

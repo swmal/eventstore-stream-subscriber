@@ -107,6 +107,7 @@ function closeConnection() {
     let endpoint = eventstoreHelper.getEndpoint();
     console.log("Closing connection to host " + endpoint);
     eventstoreHelper.connection.close();
+    eventhandler.removeAllListeners();
     
 }
 
