@@ -89,3 +89,10 @@ subscriber.createConnection({}).then(() =>
     Resolves to tcp://eventstoreprod.somewhere.com:3113
 */
 ```
+### Logging
+The following loglevels can be set in the environment variable EVENSTORE_STREAM_SUB_LOGLEVEL:
+
+info
+warning
+error
+fatal

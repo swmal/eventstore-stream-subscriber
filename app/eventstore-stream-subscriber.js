@@ -1,6 +1,8 @@
 
 const eventhandler = require('./eventstore-eventhandler.js');
+const logger = require('./logging.js')
 const client = require("node-eventstore-client");
+const connectionConfig = require("./connectionConfigurator.js");
 
 
 /**
@@ -21,12 +23,13 @@ var configuration = {
     eventstorePort : 1113
 };
 
+
 const eventstoreHelper = {
-    getCredentials : () => client.UserCredentials(configuration.userName, configuration.password),
+    getCredentials : () => new client.UserCredentials(configuration.userName, configuration.password),
     getEndpoint : () => {
         if (process.env.EVENTSTORE_STREAM_SUB_HOST)
             return `tcp://${process.env.EVENTSTORE_STREAM_SUB_HOST}:${process.env.EVENTSTORE_STREAM_SUB_PORT}`;
-        return `tcp://${configuration.eventstoreHost}:${configuration.eventstorePort}`;;
+        return `tcp://${configuration.eventstoreHost}:${configuration.eventstorePort}`;
     }, 
     connection : null
 };
@@ -36,8 +39,10 @@ const eventstoreHelper = {
  * @param {configuration} config The configuration.
  */
 function configure(config){
-    if(typeof config !== 'object')
-        throw Error("argument 'config' must be an object");
+    if(typeof config !== 'object'){
+        logger.handleLog(logger.logLevels.FATAL, "argument 'config' must be an object");
+    }
+        
     configuration.resolveLinkTos = config.resolveLinkTos;
     configuration.logHeartbeats = config.logHeartbeats;
     if(config.userName){
@@ -56,8 +61,25 @@ function configure(config){
 
 
 
-const eventAppeared = (subscription, event) => eventhandler.emitEvent(event.originalEvent.eventType, subscription, event);
-const subscriptionDropped = (subscription, reason, error) => console.log("Subscription dropped " + reason + " error: " + error);
+const eventAppeared = (subscription, event) => {
+    logger.handleLog(logger.logLevels.INFO, "Event appeared...");
+    if(event.eventType){
+        logger.handleLog(logger.logLevels.INFO, "Type: " + event.eventType);
+        eventHandler.emitEvent(event.eventType, subscription, event);
+    }
+    else if(event.event && event.event.eventType){
+        logger.handleLog(logger.logLevels.INFO, "Type: " + event.event.eventType);
+        eventhandler.emitEvent(event.event.eventType, subscription, event);
+    }
+    else if(event.originalEvent && event.originalEvent.eventType){
+        logger.handleLog(logger.logLevels.INFO, "Type: " + event.originalEvent.eventType);
+        eventhandler.emitEvent(event.originalEvent.eventType, subscription, event);
+    }else{
+        logger.handleLog(logger.logLevels.WARNING, "Event appeared, but no eventType could be detected.")
+    }
+    
+}
+const subscriptionDropped = (subscription, reason, error) => logger.handleLog(LogLevels.ERROR, "Subscription dropped " + reason + " error: " + error);
 
 /**
  * Connects to an eventstore server: either to localhost:
@@ -67,31 +89,36 @@ const subscriptionDropped = (subscription, reason, error) => console.log("Subscr
  * @param {number} settings.heartbeatInterval Heartbeat interval
  * @returns {Promise.void} 
  */
-function createConnection(settings) {
+function createConnection(settings, connectionName) {
     var error = null;
-    if(!settings) throw new Error("parameter settings must be an object");
+    if(!settings)
+        logger.handleLog(logger.logLevels.FATAL, "parameterSettings must be an object");
     let endpoint = eventstoreHelper.getEndpoint();
-    console.log("Creating connection to host " + endpoint);
-    let conn = client.createConnection(settings, eventstoreHelper.getEndpoint());  
+    logger.handleLog(logger.logLevels.INFO, "Creating connection to host " + endpoint);
+    let conn = client.createConnection(settings, eventstoreHelper.getEndpoint(), connectionName);  
     eventstoreHelper.connection = conn;
     conn.connect().catch(err => error = err);
     return new Promise(function (resolve, reject) {
         if (error) {
+            logger.handleLog(logger.logLevels.ERROR, error);
             reject(error);
         } else {
+            /*
             conn.on("error", error =>
-                console.log(`Error occurred on connection: ${error}`)
+                logger.handleLog(logger.logLevels.ERROR, `Error occurred on connection: ${error}`)
             );
 
             conn.on("closed", reason =>
-                console.log(`Connection closed, reason: ${reason}`)
+                logger.handleLog(logger.logLevels.INFO, `Connection closed, reason: ${reason}`)
             );
             if(configuration.logHeartbeats){
                 conn.on('heartbeatInfo', heartbeatInfo =>
-                console.log('Heartbeat latency', heartbeatInfo.responseReceivedAt - heartbeatInfo.requestSentAt, 'ms'));
-            }
+                
+                logger.handleLog(logger.logLevels.INFO, 'Heartbeat latency', heartbeatInfo.responseReceivedAt - heartbeatInfo.requestSentAt, 'ms'));
+            }*/
+            connectionConfig.addEventHandlers(conn, configuration, logger);
             conn.once("connected", tcpEndpoint => {
-                console.log(`connected to Eventstore - host: ${tcpEndpoint.host} port: ${tcpEndpoint.port}`);
+                logger.handleLog(logger.logLevels.INFO, `connected to Eventstore - host: ${tcpEndpoint.host} port: ${tcpEndpoint.port}`);
                 resolve();
             });
             
@@ -105,7 +132,7 @@ function createConnection(settings) {
  */
 function closeConnection() {
     let endpoint = eventstoreHelper.getEndpoint();
-    console.log("Closing connection to host " + endpoint);
+    logger.handleLog(logger.logLevels.INFO, "Closing connection to host " + endpoint);
     eventstoreHelper.connection.close();
     eventhandler.removeAllListeners();
     
@@ -122,6 +149,7 @@ function subscribeToStream(stream) {
         if(!conn){
             reject("Connection not initialized, call createConnection() first");
         } else{
+            logger.handleLog(logger.logLevels.INFO, "Subscribing to stream " + stream);
             conn.subscribeToStream(
                 stream,
                 configuration.resolveLinkTos,
@@ -134,8 +162,56 @@ function subscribeToStream(stream) {
     });   
 }
 
+async function readWholeStreamFromStart(stream, settings, connectionName)
+{
+    let endpoint = eventstoreHelper.getEndpoint();
+    let conn = client.createConnection(settings, endpoint, connectionName);
+    connectionConfig.addEventHandlers(conn, configuration, logger);
+    conn.once('connected', tcpEndpoint => {
+        logger.handleLog(logger.logLevels.INFO, `connected to Eventstore - host: ${tcpEndpoint.host} port: ${tcpEndpoint.port}`);
+    });
+    readStreamForward(stream, settings, conn)
+        .then(() => conn.close())
+        .catch((error) => {
+            logger.handleLog(logger.logLevels.ERROR, error);
+            try{
+                conn.close();
+            }catch(e){}
+            
+        });
+        
+}
+
+async function readStreamForward(stream, settings, conn){
+    logger.info("connecting to eventstore");
+    await conn.connect();
+    let eh = (e) => eventAppeared(null, e);
+    var result;
+    await readEventSliceForward(conn, stream, 0, eh).then(async(r) => {
+        result = r;
+    });
+    while(!result.isEOS) {
+        await readEventSliceForward(conn, stream, result.next, eh).then(async(r) => result = r);
+    }
+}
+
+async function readEventSliceForward(conn, stream, startPos, eventHandler){
+    let rs = await conn.readStreamEventsForward(stream, startPos, 2, true, eventstoreHelper.getCredentials());
+    var jsonString = JSON.stringify(rs);
+    var slice = JSON.parse(jsonString);
+    for(ix in slice.events){
+        let e = slice.events[ix];
+        eventHandler(e);
+    }
+    return {
+        isEOS : slice.isEndOfStream,
+        next : slice.nextEventNumber.low
+    };
+}
+
 function catchupAndSubscribeToStream(stream){
     var conn = eventstoreHelper.connection;
+    logger.handleLog(logger.logLevels.INFO, "cred: " + JSON.stringify(eventstoreHelper.getCredentials()));
     return new Promise(function(resolve, reject){
         if(!conn){
             reject("Connection not initialized, call createConnection() first");
@@ -145,7 +221,7 @@ function catchupAndSubscribeToStream(stream){
                 null, 
                 resolve, 
                 eventAppeared, 
-                (s) => console.log("Live processing started..."), 
+                (s) => logger.handleLog(logger.logLevels.INFO, "Live processing started..."), 
                 subscriptionDropped, 
                 eventstoreHelper.getCredentials()
             );
@@ -166,6 +242,7 @@ module.exports.closeConnection = closeConnection;
 module.exports.subscribeToStream = subscribeToStream;
 module.exports.catchupAndSubscribeToStream = catchupAndSubscribeToStream;
 module.exports.registerHandler = eventhandler.registerHandler;
+module.exports.readWholeStreamFromStart = readWholeStreamFromStart;
 
 
 
