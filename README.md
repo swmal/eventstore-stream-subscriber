@@ -38,6 +38,29 @@ subscriber.createConnection({}).then(() =>
 .catch((reason) => console.log(reason));
 
 ```
+
+### Read the entire stream from start to end
+
+```javascript
+        // register handlers
+        subscriber.registerHandler("OrderCreated", (subscription, evt) => {
+            logger.info("OrderCreated event arrived!");
+            logger.info(JSON.stringify(evt));
+        });
+        subscriber.registerHandler("ItemAdded", (subscription, evt) => {
+            logger.info("ItemAdded event arrived!");
+            logger.info(JSON.stringify(evt));
+        });
+
+        const streamName = "Order-123";
+        // the second arg is connection parameters, same args as createConnection
+        await subscriber.readWholeStreamFromStart(streamName, {}, "myConnection")
+                .then((rs) => console.log("ok"))
+                .catch(reason => console.log(reason));
+            
+    });
+```
+
 ### Configuration
 The default configuration:
 ```javascript

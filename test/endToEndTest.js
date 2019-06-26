@@ -105,7 +105,7 @@ it("should add a handler, connect to EventStore, emit an event and close the con
             logger.info(JSON.stringify(evt));
         });
         subscriber3.registerHandler("ItemAdded", (subscription, evt) => {
-            logger.info("OrderCreated event arrived!");
+            logger.info("ItemAdded event arrived!");
             logger.info(JSON.stringify(evt));
         });
 
