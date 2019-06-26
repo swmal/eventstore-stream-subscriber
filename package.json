@@ -1,11 +1,12 @@
 {
   "name": "eventstore-stream-subscriber",
-  "version": "1.0.25",
+  "version": "1.0.30",
   "description": "Eventhandler for an eventstore stream",
   "main": "app/eventstore-stream-subscriber.js",
   "scripts": {
     "test": "mocha"
   },
+  "homepage": "https://github.com/swmal/eventstore-stream-subscriber",
   "keywords": [
     "eventstore"
   ],
