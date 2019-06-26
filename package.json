@@ -13,6 +13,7 @@
   "author": "Mats Alm",
   "license": "ISC",
   "dependencies": {
+    "absorb": "^1.0.1",
     "assert-promise": "0.0.3",
     "chai": "^4.2.0",
     "mocha": "^6.1.4",

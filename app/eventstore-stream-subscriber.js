@@ -2,6 +2,7 @@
 const eventhandler = require('./eventstore-eventhandler.js');
 const logger = require('./logging.js')
 const client = require("node-eventstore-client");
+const absorb = require("absorb");
 const connectionConfig = require("./connectionConfigurator.js");
 
 
@@ -14,13 +15,15 @@ const connectionConfig = require("./connectionConfigurator.js");
  * @param {string} eventstoreHost Eventstore hostname
  * @param {number} eventstorePort Eventstore port
  */
-var configuration = {
+let configuration = {
     resolveLinkTos : true,
     logHeartbeats : true,
     userName : "admin",
     password : "changeit",
     eventstoreHost : "127.0.0.1",
-    eventstorePort : 1113
+    eventstorePort : 1113,
+    logger: console.log
+
 };
 
 
@@ -40,23 +43,10 @@ const eventstoreHelper = {
  */
 function configure(config){
     if(typeof config !== 'object'){
-        logger.handleLog(logger.logLevels.FATAL, "argument 'config' must be an object");
+      logger.handleLog(logger.logLevels.FATAL, "argument 'config' must be an object");
+      throw Error("argument 'config' must be an object");
     }
-        
-    configuration.resolveLinkTos = config.resolveLinkTos;
-    configuration.logHeartbeats = config.logHeartbeats;
-    if(config.userName){
-        configuration.userName = config.userName;
-    }
-    if(config.password){
-        configuration.password = config.password;
-    }
-    if(config.eventstoreHost){
-        configuration.eventstoreHost = config.eventstoreHost;
-    }
-    if(config.eventstorePort){
-        configuration.eventstorePort = config.eventstorePort;
-    }
+    absorb(configuration, config);
 }
 
 
