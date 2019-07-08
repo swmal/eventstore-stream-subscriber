@@ -160,7 +160,7 @@ module.exports = () => {
         conn.once('connected', tcpEndpoint => {
             logger.handleLog(logger.logLevels.INFO, `connected to Eventstore - host: ${tcpEndpoint.host} port: ${tcpEndpoint.port}`);
         });
-        readStreamForward(stream, settings, conn)
+        await readStreamForward(stream, settings, conn)
             .then(() => conn.close())
             .catch((error) => {
                 logger.handleLog(logger.logLevels.ERROR, error);
@@ -228,7 +228,8 @@ module.exports = () => {
         catchupAndSubscribeToStream: catchupAndSubscribeToStream,
         registerHandler: eventhandler.registerHandler,
         registerGlobalHandler: eventhandler.registerGlobalHandler,
-        readWholeStreamFromStart: readWholeStreamFromStart
+        readWholeStreamFromStart: readWholeStreamFromStart,
+        removeAllListeners : eventhandler.removeAllListeners
     }
 }
 
