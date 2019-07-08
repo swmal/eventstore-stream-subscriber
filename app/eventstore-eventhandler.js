@@ -3,6 +3,8 @@ var EventsEmitter = require("events");
 class MyEmitter extends EventsEmitter{}
 const eventHandlers = new MyEmitter();
 
+const GlobalHandlerName = "15c7cc75-cdbf-4c71-8914-6c6de0f91790";
+
 /**
  * Register a event handler
  * @param {string} eventType Event type to subscribe to
@@ -19,6 +21,14 @@ function registerHandler(eventType, handler){
         eventHandlers.addListener(eventType, handler);
 }
 
+function registerGlobalHandler(handler) {
+    if(typeof handler !== 'function'){
+        throw new Error("argument 'handler' must be a function");
+    }
+
+    eventHandlers.addListener(GlobalHandlerName, handler);
+}
+
 /**
  * 
  * @param {string} eventType Event type to subscribe to
@@ -27,6 +37,7 @@ function registerHandler(eventType, handler){
  */
 function emitEvent(eventType, subscription, e){
     eventHandlers.emit(eventType, subscription, e);
+    eventHandlers.emit(GlobalHandlerName, subscription, e, eventType);
 }
 
 function removeAllListeners(){
@@ -34,5 +45,6 @@ function removeAllListeners(){
 }
 
 module.exports.registerHandler = registerHandler;
+module.exports.registerGlobalHandler = registerGlobalHandler;
 module.exports.emitEvent = emitEvent;
 module.exports.removeAllListeners = removeAllListeners;
