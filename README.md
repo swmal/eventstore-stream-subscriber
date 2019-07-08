@@ -42,21 +42,18 @@ subscriber.createConnection({}).then(() =>
 ### Read the entire stream from start to end
 
 ```javascript
-        // register handlers
-        subscriber.registerHandler("OrderCreated", (subscription, evt) => {
-            logger.info("OrderCreated event arrived!");
-            logger.info(JSON.stringify(evt));
-        });
-        subscriber.registerHandler("ItemAdded", (subscription, evt) => {
-            logger.info("ItemAdded event arrived!");
+        // register a global handler (will receive all)
+        subscriber.registerGlobalHandler((subscription, evt, eventType) => {
+            logger.info(`${eventType} event arrived!`);
             logger.info(JSON.stringify(evt));
         });
 
+        subscriber.configure({ resolveLinkTos: true });
+
         const streamName = "Order-123";
-        // the second arg is connection parameters, same args as createConnection
-        await subscriber.readWholeStreamFromStart(streamName, {}, "myConnection")
-                .then((rs) => console.log("ok"))
-                .catch(reason => console.log(reason));
+        await subscriber.readWholeStreamFromStart(streamName, {}, "c3")
+            .then((rs) => console.log("ok"))
+            .catch(reason => logger.handleLog(logger.logLevels.WARNING, "reason: " + reason));
             
     });
 ```
