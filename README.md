@@ -63,7 +63,7 @@ The default configuration:
 ```javascript
 var configuration = {
     resolveLinkTos : true,
-    logHeartbeats : true,
+    logHeartbeats : false,
     userName : "admin",
     password : "changeit",
     eventstoreHost : "127.0.0.1",
