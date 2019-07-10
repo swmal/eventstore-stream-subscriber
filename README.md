@@ -4,7 +4,7 @@ Subscribe to an Eventstore stream with the possibility to add separate event han
 ### Subscribe to realtime events only
 
 ```javascript
-var subscriber = require("eventstore-stream-subscriber");
+var subscriber = require("eventstore-stream-subscriber")();
 
 // register eventhandlers for eventtypes of a stream
 subscriber.registerHandler("myEventType", (subscription, evt) => {
@@ -110,7 +110,7 @@ subscriber.createConnection({}).then(() =>
 */
 ```
 ### Logging
-The following loglevels can be set in the environment variable EVENSTORE_STREAM_SUB_LOGLEVEL:
+The following loglevels can be set in the environment variable EVENTSTORE_STREAM_SUB_LOGLEVEL:
 
 info
 warning

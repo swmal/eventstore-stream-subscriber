@@ -140,4 +140,9 @@ describe("test end to end", async () => {
         logger.handleLog(logger.logLevels.WARNING, "reason: " + reason)
       );
   });
+  it("should configure heartbeats", () =>{
+    let subscriber = require("../app/eventstore-stream-subscriber.js")();
+    subscriber.configure({ logHeartbeats : true})
+    subscriber.createConnection({}).then(() => subscriber.close());
+  });
 });

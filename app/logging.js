@@ -6,7 +6,7 @@ var logLevels = {
 };
 
 function getLogLevel(){
-    var l = process.env.EVENSTORE_STREAM_SUB_LOGLEVEL;
+    var l = process.env.EVENTSTORE_STREAM_SUB_LOGLEVEL;
     l = l ? l : logLevels.INFO.label;
     switch(l){
         case logLevels.INFO.label:

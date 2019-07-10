@@ -15,9 +15,9 @@ module.exports = () => {
    * @param {string} eventstoreHost Eventstore hostname
    * @param {number} eventstorePort Eventstore port
    */
-  let configuration = {
+  var configuration = {
     resolveLinkTos: true,
-    logHeartbeats: true,
+    logHeartbeats: false,
     userName: "admin",
     password: "changeit",
     eventstoreHost: "127.0.0.1",
