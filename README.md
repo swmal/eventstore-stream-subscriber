@@ -44,8 +44,8 @@ subscriber.createConnection({}).then(() =>
 ```javascript
         // register a global handler (will receive all)
         subscriber.registerGlobalHandler((subscription, evt, eventType) => {
-            logger.info(`${eventType} event arrived!`);
-            logger.info(JSON.stringify(evt));
+            console.log(`${eventType} event arrived!`);
+            console.log(JSON.stringify(evt));
         });
 
         subscriber.configure({ resolveLinkTos: true });
@@ -53,7 +53,7 @@ subscriber.createConnection({}).then(() =>
         const streamName = "Order-123";
         await subscriber.readWholeStreamFromStart(streamName, {}, "c3")
             .then((rs) => console.log("ok"))
-            .catch(reason => logger.handleLog(logger.logLevels.WARNING, "reason: " + reason));
+            .catch(reason => console.log("reason: " + reason));
             
     });
 ```
