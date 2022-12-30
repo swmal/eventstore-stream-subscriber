@@ -16,7 +16,7 @@
     "absorb": "^1.0.1",
     "assert-promise": "0.0.3",
     "chai": "^4.2.0",
-    "mocha": "^6.1.4",
+    "mocha": "^10.2.0",
     "node-eventstore-client": "0.2.10"
   }
 }
